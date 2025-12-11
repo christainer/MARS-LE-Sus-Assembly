@@ -10,6 +10,7 @@ MARS (official) MIPS Assembler and Runtime Simulator
 
  To run, open up MARS, navigate to tools in the top menu, and select language switcher.
  A separate window should appear, from there choose the second language called "Sus-32 Assembly".
+ 
  *NOTE: For some odd reason, it appears twice; make sure to use the version that includes taskset as an operand*
 
  There is also a PDF reference sheet called "SUS-32 "Among Us" Reference Sheet" for your guidance on the instructions.
