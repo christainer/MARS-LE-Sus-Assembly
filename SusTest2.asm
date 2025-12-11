@@ -8,8 +8,8 @@
 .globl main
 
 main:
-    li  $s0, 2                # $s0 = player index (crew A)
-    li  $t0, 1                # mask 0x1
+    taskset  $s0, 2                # $s0 = player index (crew A)
+    taskset  $t0, 1                # mask 0x1
 
     scanmed  $t1              # t1 = medbay status word
     taskand  $t1,$t1,$t0      # t1 = t1 & 1 (keep bit 0)

@@ -4,7 +4,7 @@
 .globl main
 
 main:
-    li  $t0, -1               # suspicion meter (negative = danger)
+    taskset  $t0, -1               # suspicion meter (negative = danger)
 
     randomtask $t1            # random task id
     faketask  $t2,$t1         # copy task, set susFlag = 1

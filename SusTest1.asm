@@ -4,8 +4,8 @@
 .globl main
 
 main:
-    li $t0, 5                 # first report value
-    li $t1, 5                 # second report value
+    taskset $t0, 5                 # first report value
+    taskset $t1, 5                 # second report value
 
     checksus $t0,$t1          # susFlag = (t0 != t1)
     susbeq   $t0,$t1, not_sus # if t0 == t1 -> branch

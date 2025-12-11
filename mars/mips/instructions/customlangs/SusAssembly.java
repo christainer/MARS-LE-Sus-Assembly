@@ -29,6 +29,8 @@ public class SusAssembly extends CustomAssembly {
     @Override
     protected void populate() {
 
+        //Register Instructions C-type
+
         instructionList.add(
             new BasicInstruction("taskadd $d,$s,$t",
              "TASKADD : R[rd] = R[rs] + R[rt]",
@@ -46,7 +48,9 @@ public class SusAssembly extends CustomAssembly {
                      int value = RegisterFile.getValue(rs) + RegisterFile.getValue(rt);
                      RegisterFile.updateRegister(rd, value);
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("tasksub $d,$s,$t",
@@ -65,7 +69,9 @@ public class SusAssembly extends CustomAssembly {
                      int value = RegisterFile.getValue(rs) - RegisterFile.getValue(rt);
                      RegisterFile.updateRegister(rd, value);
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("taskand $d,$s,$t",
@@ -84,7 +90,9 @@ public class SusAssembly extends CustomAssembly {
                      int value = RegisterFile.getValue(rs) & RegisterFile.getValue(rt);
                      RegisterFile.updateRegister(rd, value);
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("taskor $d,$s,$t",
@@ -103,7 +111,9 @@ public class SusAssembly extends CustomAssembly {
                      int value = RegisterFile.getValue(rs) | RegisterFile.getValue(rt);
                      RegisterFile.updateRegister(rd, value);
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("taskxor $d,$s,$t",
@@ -122,26 +132,31 @@ public class SusAssembly extends CustomAssembly {
                      int value = RegisterFile.getValue(rs) ^ RegisterFile.getValue(rt);
                      RegisterFile.updateRegister(rd, value);
                  }
-             }));
+             }
+            )
+        );
 
-        instructionList.add(
-            new BasicInstruction("sabotage $d,$s,$t",
-             "SABOTAGE : R[rd] = R[rs] ^ R[rt]",
-             BasicInstructionFormat.R_FORMAT,
-             "000000 sssss ttttt fffff 00000 101001",
-             new SimulationCode()
-             {
-                 public void simulate(ProgramStatement statement) throws ProcessingException
-                 {
-                     int[] operands = statement.getOperands();
-                     int rd = operands[0];
-                     int rs = operands[1];
-                     int rt = operands[2];
+        //Immediate Instructions T-type
 
-                     int value = RegisterFile.getValue(rs) ^ RegisterFile.getValue(rt);
-                     RegisterFile.updateRegister(rd, value);
-                 }
-             }));
+        instructionsList.add(
+            new BasicInstruction("taskset $t1,imm",
+                "TASKSET R[rt] = sign-extended immediate",
+                BasicInstructionFormat.I_FORMAT,
+                "001000 00000 fffff iiiiiiiiiiiiiiii",
+                new SimulationCode()
+                {
+                    public void simulate(ProgramStatement statement) throws ProcessingException
+                    {
+                        int[] operands = statement.getOperands();
+                        int rt = operands[0];
+                        int imm = operands[1];
+
+                        int value = (short) imm;
+                        RegisterFile.updateRegister(rt, value);
+                    }
+                }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("loadtask $t,$s,imm",
@@ -168,7 +183,9 @@ public class SusAssembly extends CustomAssembly {
                          throw new ProcessingException(statement, e);
                      }
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("savetask $t,$s,imm",
@@ -194,7 +211,9 @@ public class SusAssembly extends CustomAssembly {
                          throw new ProcessingException(statement, e);
                      }
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("susbeq $s,$t,label",
@@ -213,7 +232,9 @@ public class SusAssembly extends CustomAssembly {
                          Globals.instructionSet.processBranch(operands[2]);
                      }
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("susbne $s,$t,label",
@@ -232,25 +253,11 @@ public class SusAssembly extends CustomAssembly {
                          Globals.instructionSet.processBranch(operands[2]);
                      }
                  }
-             }));
+             }
+            )
+        );
 
-        instructionList.add(
-            new BasicInstruction("ventifneg $s,label",
-             "VENTIFNEG : if (R[rs] < 0) branch to label",
-             BasicInstructionFormat.I_BRANCH_FORMAT,
-             "010000 fffff 00000 ssssssssssssssss",
-             new SimulationCode()
-             {
-                 public void simulate(ProgramStatement statement) throws ProcessingException
-                 {
-                     int[] operands = statement.getOperands();
-                     int rsVal = RegisterFile.getValue(operands[0]);
-
-                     if (rsVal < 0) {
-                         Globals.instructionSet.processBranch(operands[1]);
-                     }
-                 }
-             }));
+        // Jump Instructions V-type
 
         instructionList.add(
             new BasicInstruction("vent label",
@@ -264,7 +271,9 @@ public class SusAssembly extends CustomAssembly {
                      int[] operands = statement.getOperands();
                      Globals.instructionSet.processBranch(operands[0]);
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("ventlink label",
@@ -280,26 +289,14 @@ public class SusAssembly extends CustomAssembly {
                      RegisterFile.updateRegister(31, currentPC + 4);
                      Globals.instructionSet.processBranch(operands[0]);
                  }
-             }));
+             }
+            )
+        );
+
+        // Special Instructions (Includes C-types, T-types, V-types. Special functions)
 
         instructionList.add(
-            new BasicInstruction("emergency label",
-             "EMERGENCY : Call meeting handler at label",
-             BasicInstructionFormat.I_BRANCH_FORMAT,
-             "010001 00000 00000 ffffffffffffffff",
-             new SimulationCode()
-             {
-                 public void simulate(ProgramStatement statement) throws ProcessingException
-                 {
-                     int[] operands = statement.getOperands();
-                     int currentPC = statement.getAddress();
-                     RegisterFile.updateRegister(31, currentPC + 4);
-                     Globals.instructionSet.processBranch(operands[0]);
-                 }
-             }));
-
-        instructionList.add(
-            new BasicInstruction("report $s",
+            new BasicInstruction("report $t1",
              "REPORT : Set susFlag if R[rs] != 0",
              BasicInstructionFormat.R_FORMAT,
              "000000 fffff 00000 00000 00000 101000",
@@ -311,9 +308,32 @@ public class SusAssembly extends CustomAssembly {
                      int rs = operands[0];
 
                      int value = RegisterFile.getValue(rs);
-                     susFlag = (value != 0);
+                     SusAssembly.susFlag = (value != 0);
                  }
-             }));
+             }
+            )
+        );
+
+        instructionList.add(
+            new BasicInstruction("sabotage $d,$s,$t",
+             "SABOTAGE : R[rd] = R[rs] ^ R[rt]",
+             BasicInstructionFormat.R_FORMAT,
+             "000000 sssss ttttt fffff 00000 101001",
+             new SimulationCode()
+             {
+                 public void simulate(ProgramStatement statement) throws ProcessingException
+                 {
+                     int[] operands = statement.getOperands();
+                     int rd = operands[0];
+                     int rs = operands[1];
+                     int rt = operands[2];
+
+                     int value = RegisterFile.getValue(rs) ^ RegisterFile.getValue(rt);
+                     RegisterFile.updateRegister(rd, value);
+                 }
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("faketask $d,$s",
@@ -332,7 +352,27 @@ public class SusAssembly extends CustomAssembly {
                      RegisterFile.updateRegister(rd, value);
                      susFlag = true;
                  }
-             }));
+             }
+            )
+        );
+
+        instructionList.add(
+            new BasicInstruction("clearvotes",
+             "CLEARVOTES : Clear vote counters in $t0-$t3",
+             BasicInstructionFormat.R_FORMAT,
+             "000000 00000 00000 00000 00000 101011",
+             new SimulationCode()
+             {
+                 public void simulate(ProgramStatement statement) throws ProcessingException
+                 {
+                     RegisterFile.updateRegister(8, 0);
+                     RegisterFile.updateRegister(9, 0);
+                     RegisterFile.updateRegister(10, 0);
+                     RegisterFile.updateRegister(11, 0);
+                 }
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("checksus $s,$t",
@@ -352,23 +392,48 @@ public class SusAssembly extends CustomAssembly {
 
                      susFlag = (v1 != v2);
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
-            new BasicInstruction("clearvotes",
-             "CLEARVOTES : Clear vote counters in $t0-$t3",
+            new BasicInstruction("randomtask $d",
+             "RANDOMTASK : Put a pseudo-random value into R[rd]",
              BasicInstructionFormat.R_FORMAT,
-             "000000 00000 00000 00000 00000 101011",
+             "000000 00000 00000 fffff 00000 101101",
              new SimulationCode()
              {
                  public void simulate(ProgramStatement statement) throws ProcessingException
                  {
-                     RegisterFile.updateRegister(8, 0);
-                     RegisterFile.updateRegister(9, 0);
-                     RegisterFile.updateRegister(10, 0);
-                     RegisterFile.updateRegister(11, 0);
+                     int[] operands = statement.getOperands();
+                     int rd = operands[0];
+
+                     int value = nextRandom();
+                     RegisterFile.updateRegister(rd, value);
                  }
-             }));
+             }
+            )
+        );
+
+        instructionList.add(
+            new BasicInstruction("ventifneg $s,label",
+             "VENTIFNEG : if (R[rs] < 0) branch to label",
+             BasicInstructionFormat.I_BRANCH_FORMAT,
+             "010000 fffff 00000 ssssssssssssssss",
+             new SimulationCode()
+             {
+                 public void simulate(ProgramStatement statement) throws ProcessingException
+                 {
+                     int[] operands = statement.getOperands();
+                     int rsVal = RegisterFile.getValue(operands[0]);
+
+                     if (rsVal < 0) {
+                         Globals.instructionSet.processBranch(operands[1]);
+                     }
+                 }
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("voteout $s",
@@ -391,7 +456,9 @@ public class SusAssembly extends CustomAssembly {
                          throw new ProcessingException(statement, e);
                      }
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
             new BasicInstruction("scanmed $t",
@@ -414,23 +481,27 @@ public class SusAssembly extends CustomAssembly {
                          throw new ProcessingException(statement, e);
                      }
                  }
-             }));
+             }
+            )
+        );
 
         instructionList.add(
-            new BasicInstruction("randomtask $d",
-             "RANDOMTASK : Put a pseudo-random value into R[rd]",
-             BasicInstructionFormat.R_FORMAT,
-             "000000 00000 00000 fffff 00000 101101",
+            new BasicInstruction("emergency label",
+             "EMERGENCY : Call meeting handler at label",
+             BasicInstructionFormat.I_BRANCH_FORMAT,
+             "010001 00000 00000 ffffffffffffffff",
              new SimulationCode()
              {
                  public void simulate(ProgramStatement statement) throws ProcessingException
                  {
                      int[] operands = statement.getOperands();
-                     int rd = operands[0];
-
-                     int value = nextRandom();
-                     RegisterFile.updateRegister(rd, value);
+                     int currentPC = statement.getAddress();
+                     RegisterFile.updateRegister(31, currentPC + 4);
+                     Globals.instructionSet.processBranch(operands[0]);
                  }
-             }));
+             }
+            )
+        );
+
     }
 }
