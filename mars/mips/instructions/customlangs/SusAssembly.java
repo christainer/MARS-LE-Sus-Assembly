@@ -32,7 +32,7 @@ public class SusAssembly extends CustomAssembly {
         //Register Instructions C-type
 
         instructionList.add(
-            new BasicInstruction("taskadd $d,$s,$t",
+            new BasicInstruction("taskadd $t3,$t1,$t2",
              "TASKADD : R[rd] = R[rs] + R[rt]",
              BasicInstructionFormat.R_FORMAT,
              "000000 sssss ttttt fffff 00000 100000",
@@ -53,7 +53,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("tasksub $d,$s,$t",
+            new BasicInstruction("tasksub $t3,$t1,$t2",
              "TASKSUB : R[rd] = R[rs] - R[rt]",
              BasicInstructionFormat.R_FORMAT,
              "000000 sssss ttttt fffff 00000 100010",
@@ -74,7 +74,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("taskand $d,$s,$t",
+            new BasicInstruction("taskand $t3,$t1,$t2",
              "TASKAND : R[rd] = R[rs] & R[rt]",
              BasicInstructionFormat.R_FORMAT,
              "000000 sssss ttttt fffff 00000 100100",
@@ -95,7 +95,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("taskor $d,$s,$t",
+            new BasicInstruction("taskor $t3,$t1,$t2",
              "TASKOR : R[rd] = R[rs] | R[rt]",
              BasicInstructionFormat.R_FORMAT,
              "000000 sssss ttttt fffff 00000 100101",
@@ -116,7 +116,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("taskxor $d,$s,$t",
+            new BasicInstruction("taskxor $t3,$t1,$t2",
              "TASKXOR : R[rd] = R[rs] ^ R[rt]",
              BasicInstructionFormat.R_FORMAT,
              "000000 sssss ttttt fffff 00000 100110",
@@ -136,20 +136,40 @@ public class SusAssembly extends CustomAssembly {
             )
         );
 
+        instructionList.add(
+            new BasicInstruction("suspeek $t1",
+             "SUSPEEK : R[rt] = susFlag (0 or 1)",
+             BasicInstructionFormat.R_FORMAT,
+             "000000 fffff 00000 00000 00000 101010",
+             new SimulationCode()
+             {
+                 public void simulate(ProgramStatement statement) throws ProcessingException
+                 {
+                     int[] operands = statement.getOperands();
+                     int rt = operands[0];
+
+                     int value = SusAssembly.susFlag ? 1 : 0;
+                     RegisterFile.updateRegister(rt, value);
+                 }
+             }
+            )
+        );
+
         //Immediate Instructions T-type
 
         instructionList.add(
-            new BasicInstruction("taskset $t1,imm",
-                "TASKSET R[rt] = sign-extended immediate",
+            new BasicInstruction("taskset $t0, $t1, -100",
+                "TASKSET : R[rt] = sign-extended immediate (rs is ignored, use $zero)",
                 BasicInstructionFormat.I_FORMAT,
-                "001000 00000 fffff iiiiiiiiiiiiiiii",
+                "001000 sssss fffff tttttttttttttttt",
                 new SimulationCode()
                 {
                     public void simulate(ProgramStatement statement) throws ProcessingException
                     {
                         int[] operands = statement.getOperands();
                         int rt = operands[0];
-                        int imm = operands[1];
+                        int rs = operands[1];
+                        int imm = operands[2];
 
                         int value = (short) imm;
                         RegisterFile.updateRegister(rt, value);
@@ -159,7 +179,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("loadtask $t,$s,imm",
+            new BasicInstruction("loadtask $t2,$t1,imm",
              "LOADTASK : R[rt] = M[R[rs] + imm]",
              BasicInstructionFormat.I_FORMAT,
              "100011 sssss fffff tttttttttttttttt",
@@ -188,7 +208,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("savetask $t,$s,imm",
+            new BasicInstruction("savetask $t2,$t1,imm",
              "SAVETASK : M[R[rs] + imm] = R[rt]",
              BasicInstructionFormat.I_FORMAT,
              "101011 sssss fffff tttttttttttttttt",
@@ -216,7 +236,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("susbeq $s,$t,label",
+            new BasicInstruction("susbeq $t1,$t2,label",
              "SUSBEQ : if (R[rs] == R[rt]) branch to label",
              BasicInstructionFormat.I_BRANCH_FORMAT,
              "000100 fffff sssss tttttttttttttttt",
@@ -237,7 +257,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("susbne $s,$t,label",
+            new BasicInstruction("susbne $t1,$t2,label",
              "SUSBNE : if (R[rs] != R[rt]) branch to label",
              BasicInstructionFormat.I_BRANCH_FORMAT,
              "000101 fffff sssss tttttttttttttttt",
@@ -293,6 +313,8 @@ public class SusAssembly extends CustomAssembly {
             )
         );
 
+
+
         // Special Instructions (Includes C-types, T-types, V-types. Special functions)
 
         instructionList.add(
@@ -315,7 +337,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("sabotage $d,$s,$t",
+            new BasicInstruction("sabotage $t3,$t1,$t2",
              "SABOTAGE : R[rd] = R[rs] ^ R[rt]",
              BasicInstructionFormat.R_FORMAT,
              "000000 sssss ttttt fffff 00000 101001",
@@ -336,7 +358,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("faketask $d,$s",
+            new BasicInstruction("faketask $t2,$t1",
              "FAKETASK : Copy R[rs] to R[rd] and set susFlag = true",
              BasicInstructionFormat.R_FORMAT,
              "000000 sssss 00000 fffff 00000 101010",
@@ -375,7 +397,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("checksus $s,$t",
+            new BasicInstruction("checksus $t1,$t2",
              "CHECKSUS : Set susFlag if R[rs] != R[rt]",
              BasicInstructionFormat.R_FORMAT,
              "000000 fffff sssss 00000 00000 101100",
@@ -397,7 +419,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("randomtask $d",
+            new BasicInstruction("randomtask $t3",
              "RANDOMTASK : Put a pseudo-random value into R[rd]",
              BasicInstructionFormat.R_FORMAT,
              "000000 00000 00000 fffff 00000 101101",
@@ -416,7 +438,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("ventifneg $s,label",
+            new BasicInstruction("ventifneg $t1,label",
              "VENTIFNEG : if (R[rs] < 0) branch to label",
              BasicInstructionFormat.I_BRANCH_FORMAT,
              "010000 fffff 00000 ssssssssssssssss",
@@ -436,7 +458,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("voteout $s",
+            new BasicInstruction("voteout $t1",
              "VOTEOUT : Eject player with index in R[rs]",
              BasicInstructionFormat.I_FORMAT,
              "010010 fffff 00000 0000000000000000",
@@ -461,7 +483,7 @@ public class SusAssembly extends CustomAssembly {
         );
 
         instructionList.add(
-            new BasicInstruction("scanmed $t",
+            new BasicInstruction("scanmed $t2",
              "SCANMED : Load medbay status from 0xFFFF0000 into R[rt]",
              BasicInstructionFormat.I_FORMAT,
              "010011 00000 fffff 0000000000000000",

@@ -8,19 +8,23 @@
 .globl main
 
 main:
-    taskset  $s0, 2                # $s0 = player index (crew A)
-    taskset  $t0, 1                # mask 0x1
+    taskset  $s0, $zero, 2                # $s0 = player index (crew A)
+    taskset  $t0, $zero, 1                # mask 0x1
 
     scanmed  $t1              # t1 = medbay status word
     taskand  $t1,$t1,$t0      # t1 = t1 & 1 (keep bit 0)
 
     susbeq   $t1,$zero, maybe_sus   # if bit 0 == 0 -> not confirmed
 
+    suspeek  $t2
     vent      done            # confirmed -> nothing happens
 
 maybe_sus:
     voteout   $s0             # mark player as ejected
     clearvotes                # reset vote counters (t0–t3)
+    
+    suspeek  $t2
+    vent done
 
 done:
-    vent      done
+

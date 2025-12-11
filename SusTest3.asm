@@ -4,11 +4,12 @@
 .globl main
 
 main:
-    taskset  $t0, -1               # suspicion meter (negative = danger)
+    taskset  $t0, $zero, -1               # suspicion meter (negative = danger)
 
     randomtask $t1            # random task id
     faketask  $t2,$t1         # copy task, set susFlag = 1
-
+    
+    suspeek  $t3
     ventifneg $t0, call_meeting   # if suspicion < 0 -> meeting
     vent       done               # otherwise end
 
@@ -20,5 +21,6 @@ meeting_handler:
     clearvotes                    # reset votes
     checksus $t1,$t2              # re-check susFlag based on t1,t2
     
+    suspeek  $t3
     vent meeting_handler
-
+done:
