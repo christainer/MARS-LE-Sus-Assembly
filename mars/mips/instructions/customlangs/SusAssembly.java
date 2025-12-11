@@ -138,7 +138,7 @@ public class SusAssembly extends CustomAssembly {
 
         //Immediate Instructions T-type
 
-        instructionsList.add(
+        instructionList.add(
             new BasicInstruction("taskset $t1,imm",
                 "TASKSET R[rt] = sign-extended immediate",
                 BasicInstructionFormat.I_FORMAT,
