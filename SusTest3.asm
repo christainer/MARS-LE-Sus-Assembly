@@ -19,4 +19,6 @@ call_meeting:
 meeting_handler:
     clearvotes                    # reset votes
     checksus $t1,$t2              # re-check susFlag based on t1,t2
-    jr   $ra                      # return to caller 
+    
+    vent meeting_handler
+
