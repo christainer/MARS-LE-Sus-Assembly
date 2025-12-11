@@ -8,14 +8,14 @@ main:
     li $t1, 5                 # second report value
 
     checksus $t0,$t1          # susFlag = (t0 != t1)
-    susbeq   $t0,$t1, not_sus # if t0 == t1 → branch
+    susbeq   $t0,$t1, not_sus # if t0 == t1 -> branch
 
     # values different path
-    report   $t0              # nonzero → susFlag = 1
+    report   $t0              # nonzero -> susFlag = 1
     vent     done
 
 not_sus:
-    report   $zero            # 0 → susFlag = 0
+    report   $zero            # 0 -> susFlag = 0
 
 done:
     vent     done             # idle loop

@@ -9,7 +9,7 @@ main:
     randomtask $t1            # random task id
     faketask  $t2,$t1         # copy task, set susFlag = 1
 
-    ventifneg $t0, call_meeting   # if suspicion < 0 → meeting
+    ventifneg $t0, call_meeting   # if suspicion < 0 -> meeting
     vent       done               # otherwise end
 
 call_meeting:
@@ -19,4 +19,4 @@ call_meeting:
 meeting_handler:
     clearvotes                    # reset votes
     checksus $t1,$t2              # re-check susFlag based on t1,t2
-    jr   $ra                      # return to caller (standard MIPS)
+    jr   $ra                      # return to caller 
